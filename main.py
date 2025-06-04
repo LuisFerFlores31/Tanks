@@ -1,5 +1,3 @@
-#Autor: Ivan Olmos Pineda
-#Curso: Multiagentes - Graficas Computacionales
 
 import pygame
 from pygame.locals import *
