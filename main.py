@@ -23,11 +23,11 @@ ZNEAR=1.0
 ZFAR=900.0
 #Variables para definir la posicion del observador
 #gluLookAt(EYE_X,EYE_Y,EYE_Z,CENTER_X,CENTER_Y,CENTER_Z,UP_X,UP_Y,UP_Z)
-EYE_X = 0.0
-EYE_Y = 5.0
+EYE_X = 0.0 #Maybe este es para mover hacia atras
+EYE_Y = 15.0
 EYE_Z = 0.0
 CENTER_X=1.0
-CENTER_Y=5.0
+CENTER_Y=15.0
 CENTER_Z=0.0
 UP_X=0
 UP_Y=1
@@ -153,10 +153,14 @@ def display():
     
     # Dibujar el tanque
     glPushMatrix()
-    glRotatef(-90.0, 1.0, 0.0, 0.0)  # Rotación para orientar el modelo
-    glTranslatef(EYE_X, 0.0, EYE_Z)  # Posicionar el tanque en la posición del jugador
-    glRotatef(theta, 0.0, 1.0, 0.0)  # Rotar el tanque según la dirección
-    glScale(0.1, 0.1, 0.1)  # Ajustar la escala del modelo
+    # Posicionar el tanque en la posición del jugador
+    glTranslatef(EYE_X, 0.0, EYE_Z)
+    # Rotar el tanque según la dirección
+    glRotatef(theta, 0.0, 1.0, 0.0)
+    # Rotación inicial para orientar el modelo
+    glRotatef(-90.0, 1.0, 0.0, 0.0)
+    # Ajustar la escala del modelo (aumentado para hacerlo más visible)
+    glScale(5.0, 5.0, 5.0)
     objetos[0].render()
     glPopMatrix()
 
