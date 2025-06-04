@@ -1,4 +1,3 @@
-
 import pygame
 from pygame.locals import *
 
@@ -13,6 +12,8 @@ import math
 import sys
 sys.path.append('..')
 from Cubo import Cubo
+# Import obj loader
+from objloader import *
 
 screen_width = 1200
 screen_height = 800
@@ -52,6 +53,8 @@ cubos = []
 ncubos = 50
 # Guardo un cubo como el jugador para las colisiones
 player = Cubo(DimBoard, 1.0, 5.0)
+# Lista para almacenar los objetos 3D
+objetos = []
 
 def Axis():
     glShadeModel(GL_FLAT)
@@ -98,7 +101,20 @@ def Init():
     #se le pasan a los objetos el arreglo de cubos
     for obj in cubos:
         obj.getCubos(cubos)
-        
+    
+    # Configuración de iluminación
+    glLightfv(GL_LIGHT0, GL_POSITION,  (0, 200, 0, 0.0))
+    glLightfv(GL_LIGHT0, GL_AMBIENT, (0.5, 0.5, 0.5, 1.0))
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, (0.5, 0.5, 0.5, 1.0))
+    glEnable(GL_LIGHTING)
+    glEnable(GL_LIGHT0)
+    glEnable(GL_COLOR_MATERIAL)
+    glShadeModel(GL_SMOOTH)
+    
+    # Cargar el modelo del tanque
+    objetos.append(OBJ("Ejemplo11_objetos/swat_tank.obj", swapyz=True))
+    objetos[0].generate()
+
 def lookat():
     global EYE_X
     global EYE_Z
@@ -135,6 +151,15 @@ def display():
         obj.draw()
         obj.update()
     
+    # Dibujar el tanque
+    glPushMatrix()
+    glRotatef(-90.0, 1.0, 0.0, 0.0)  # Rotación para orientar el modelo
+    glTranslatef(EYE_X, 0.0, EYE_Z)  # Posicionar el tanque en la posición del jugador
+    glRotatef(theta, 0.0, 1.0, 0.0)  # Rotar el tanque según la dirección
+    glScale(0.1, 0.1, 0.1)  # Ajustar la escala del modelo
+    objetos[0].render()
+    glPopMatrix()
+
 done = False
 Init()
 while not done:
