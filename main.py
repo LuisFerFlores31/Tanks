@@ -24,7 +24,7 @@ ZFAR=900.0
 #Variables para definir la posicion del observador
 #gluLookAt(EYE_X,EYE_Y,EYE_Z,CENTER_X,CENTER_Y,CENTER_Z,UP_X,UP_Y,UP_Z)
 EYE_X = 0.0 #Maybe este es para mover hacia atras
-EYE_Y = 15.7
+EYE_Y = 15.6
 EYE_Z = 0.0
 CENTER_X=1.0
 CENTER_Y=15.0
