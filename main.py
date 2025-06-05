@@ -44,6 +44,7 @@ DimBoard = 200
 #Vector de direcc. del observador
 dir = [1.0, 0.0, 0.0]
 theta = 0.0
+total_theta = 0.0  # Track total rotation
 col = 0
 
 pygame.init()
@@ -155,8 +156,8 @@ def display():
     glPushMatrix()
     # Posicionar el tanque en la posición del jugador
     glTranslatef(EYE_X, 0.0, EYE_Z)
-    # Rotar el tanque según la dirección
-    glRotatef(theta, 0.0, 1.0, 0.0)
+    # Rotar el tanque según la dirección total
+    glRotatef(total_theta, 0.0, 1.0, 0.0)
     # Rotación inicial para orientar el modelo
     glRotatef(-90.0, 1.0, 0.0, 0.0)
     # Ajustar la escala del modelo (aumentado para hacerlo más visible)
@@ -228,9 +229,11 @@ while not done:
 
     if keys[pygame.K_LEFT]:
         theta = 1
+        total_theta += 1  # Increment total rotation
         lookat()
     if keys[pygame.K_RIGHT]:
         theta = -1
+        total_theta -= 1  # Decrement total rotation
         lookat()                     
     
     for event in pygame.event.get():
