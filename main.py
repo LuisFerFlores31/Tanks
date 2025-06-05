@@ -1,4 +1,3 @@
-
 import pygame
 from pygame.locals import *
 
@@ -53,28 +52,49 @@ ncubos = 50
 # Guardo un cubo como el jugador para las colisiones
 player = Cubo(DimBoard, 1.0, 5.0)
 
-def Axis():
-    glShadeModel(GL_FLAT)
-    glLineWidth(3.0)
-    #X axis in red
-    glColor3f(1.0,0.0,0.0)
-    glBegin(GL_LINES)
-    glVertex3f(X_MIN,0.0,0.0)
-    glVertex3f(X_MAX,0.0,0.0)
-    glEnd()
-    #Y axis in green
-    glColor3f(0.0,1.0,0.0)
-    glBegin(GL_LINES)
-    glVertex3f(0.0,Y_MIN,0.0)
-    glVertex3f(0.0,Y_MAX,0.0)
-    glEnd()
-    #Z axis in blue
-    glColor3f(0.0,0.0,1.0)
-    glBegin(GL_LINES)
-    glVertex3f(0.0,0.0,Z_MIN)
-    glVertex3f(0.0,0.0,Z_MAX)
-    glEnd()
-    glLineWidth(1.0)
+
+
+# def Axis():
+#     glShadeModel(GL_FLAT)
+#     glLineWidth(3.0)
+#     #X axis in red
+#     glColor3f(1.0,0.0,0.0)
+#     glBegin(GL_LINES)
+#     glVertex3f(X_MIN,0.0,0.0)
+#     glVertex3f(X_MAX,0.0,0.0)
+#     glEnd()
+#     #Y axis in green
+#     glColor3f(0.0,1.0,0.0)
+#     glBegin(GL_LINES)
+#     glVertex3f(0.0,Y_MIN,0.0)
+#     glVertex3f(0.0,Y_MAX,0.0)
+#     glEnd()
+#     #Z axis in blue
+#     glColor3f(0.0,0.0,1.0)
+#     glBegin(GL_LINES)
+#     glVertex3f(0.0,0.0,Z_MIN)
+#     glVertex3f(0.0,0.0,Z_MAX)
+#     glEnd()
+#     glLineWidth(1.0)
+
+
+
+def load_texture(path):
+    texture_surface = pygame.image.load(path)
+    texture_data = pygame.image.tostring(texture_surface, "RGB", True)
+    width = texture_surface.get_width()
+    height = texture_surface.get_height()
+
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+    return texture_id
+
+
 
 def Init():
     screen = pygame.display.set_mode(
@@ -91,6 +111,10 @@ def Init():
     glClearColor(0,0,0,0)
     glEnable(GL_DEPTH_TEST)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
+    glEnable(GL_TEXTURE_2D)
+    global suelo_texture
+    suelo_texture = load_texture("../Tanks/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_diff_4k.jpg")
+    
     
     for i in range(ncubos):
         cubos.append(Cubo(DimBoard, 1.0, 5.0))
@@ -121,15 +145,28 @@ def lookat():
 
 def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    Axis()
+    #Axis()
     #Se dibuja el plano gris
-    glColor3f(0.3, 0.3, 0.3)
+    # glColor3f(0.3, 0.3, 0.3)
+    # glBegin(GL_QUADS)
+    # glVertex3d(-DimBoard, 0, -DimBoard)
+    # glVertex3d(-DimBoard, 0, DimBoard)
+    # glVertex3d(DimBoard, 0, DimBoard)
+    # glVertex3d(DimBoard, 0, -DimBoard)
+    # glEnd()
+    glBindTexture(GL_TEXTURE_2D, suelo_texture)
+    glColor3f(1.0, 1.0, 1.0)  # Sin tintado
     glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 0.0)
     glVertex3d(-DimBoard, 0, -DimBoard)
+    glTexCoord2f(0.0, 10.0)
     glVertex3d(-DimBoard, 0, DimBoard)
+    glTexCoord2f(10.0, 10.0)
     glVertex3d(DimBoard, 0, DimBoard)
+    glTexCoord2f(10.0, 0.0)
     glVertex3d(DimBoard, 0, -DimBoard)
     glEnd()
+
     #Se dibuja cubos
     for obj in cubos:
         obj.draw()
@@ -208,7 +245,10 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
 
+
     display()
+    
+
 
     pygame.display.flip()
     pygame.time.wait(10)
