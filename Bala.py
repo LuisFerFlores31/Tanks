@@ -1,3 +1,5 @@
+# ---------- Bala.py ----------
+
 import math
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -5,8 +7,8 @@ from OpenGL.GLUT import *
 
 class Bala:
     def __init__(self, start_pos, direction, speed=5.0, size=1.0):
-        #donde start_pos es la lista [x, y, z] (coordenadas iniciales)
-        #donde direction es la lista [dx, 0, dz] (dirección antes de normalizar)
+        # start_pos es la lista [x, y, z] (coordenadas iniciales)
+        # direction es la lista [dx, 0, dz] (dirección antes de normalizar)
         self.pos = [start_pos[0], start_pos[1], start_pos[2]]
 
         mag = math.sqrt(direction[0]**2 + direction[2]**2)
@@ -42,20 +44,20 @@ class Bala:
         glPushMatrix()
         glTranslatef(x, y, z)
         glScalef(self.size, self.size, self.size)
-        glColor3f(1.0, 0.0, 0.0)  
+        glColor3f(1.0, 0.0, 0.0)  # rojo
 
         glBegin(GL_QUADS)
-        
+
         glVertex3f(-half, -half,  half)
         glVertex3f( half, -half,  half)
         glVertex3f( half,  half,  half)
         glVertex3f(-half,  half,  half)
-        
+    
         glVertex3f(-half, -half, -half)
         glVertex3f(-half,  half, -half)
         glVertex3f( half,  half, -half)
         glVertex3f( half, -half, -half)
-       
+    
         glVertex3f(-half, -half, -half)
         glVertex3f(-half, -half,  half)
         glVertex3f(-half,  half,  half)
@@ -65,12 +67,12 @@ class Bala:
         glVertex3f( half,  half, -half)
         glVertex3f( half,  half,  half)
         glVertex3f( half, -half,  half)
-        
+
         glVertex3f(-half,  half, -half)
         glVertex3f(-half,  half,  half)
         glVertex3f( half,  half,  half)
         glVertex3f( half,  half, -half)
-       
+        
         glVertex3f(-half, -half, -half)
         glVertex3f( half, -half, -half)
         glVertex3f( half, -half,  half)
