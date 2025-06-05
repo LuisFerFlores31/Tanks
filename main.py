@@ -18,13 +18,13 @@ from objloader import *
 screen_width = 1200
 screen_height = 800
 #vc para el obser.
-FOVY=60.0
+FOVY=103.0
 ZNEAR=1.0
 ZFAR=900.0
 #Variables para definir la posicion del observador
 #gluLookAt(EYE_X,EYE_Y,EYE_Z,CENTER_X,CENTER_Y,CENTER_Z,UP_X,UP_Y,UP_Z)
 EYE_X = 0.0 #Maybe este es para mover hacia atras
-EYE_Y = 15.0
+EYE_Y = 15.7
 EYE_Z = 0.0
 CENTER_X=1.0
 CENTER_Y=15.0
@@ -44,7 +44,7 @@ DimBoard = 200
 #Vector de direcc. del observador
 dir = [1.0, 0.0, 0.0]
 theta = 0.0
-total_theta = 0.0  # Track total rotation
+total_theta = -90.0  # Track total rotation
 col = 0
 
 pygame.init()
@@ -113,7 +113,8 @@ def Init():
     glShadeModel(GL_SMOOTH)
     
     # Cargar el modelo del tanque
-    objetos.append(OBJ("Ejemplo11_objetos/swat_tank.obj", swapyz=True))
+    #objetos.append(OBJ("Ejemplo11_objetos/swat_tank.obj", swapyz=True))
+    objetos.append(OBJ("Ejemplo11_objetos/Tank.obj", swapyz=True))
     objetos[0].generate()
 
 def lookat():
@@ -161,7 +162,7 @@ def display():
     # Rotación inicial para orientar el modelo
     glRotatef(-90.0, 1.0, 0.0, 0.0)
     # Ajustar la escala del modelo (aumentado para hacerlo más visible)
-    glScale(5.0, 5.0, 5.0)
+    glScale(0.6, 0.6, 0.6)
     objetos[0].render()
     glPopMatrix()
 
