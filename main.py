@@ -23,8 +23,8 @@ ZNEAR=1.0
 ZFAR=900.0
 #Variables para definir la posicion del observador
 #gluLookAt(EYE_X,EYE_Y,EYE_Z,CENTER_X,CENTER_Y,CENTER_Z,UP_X,UP_Y,UP_Z)
-EYE_X = 0.0 #Maybe este es para mover hacia atras
-EYE_Y = 15.6
+EYE_X = 0.0 
+EYE_Y = 15.6 #Variable para ajuste de camara
 EYE_Z = 0.0
 CENTER_X=1.0
 CENTER_Y=15.0
@@ -46,6 +46,12 @@ dir = [1.0, 0.0, 0.0]
 theta = 0.0
 total_theta = -90.0  # Track total rotation
 col = 0
+
+# Bot tank Variables
+BOT_X = 20
+BOT_Y = 5
+BOT_Z = 20
+BOT_ROTATION = 45.0  # Initial rotation in degrees
 
 pygame.init()
 
@@ -113,9 +119,10 @@ def Init():
     glShadeModel(GL_SMOOTH)
     
     # Cargar el modelo del tanque
-    #objetos.append(OBJ("Ejemplo11_objetos/swat_tank.obj", swapyz=True))
-    objetos.append(OBJ("Ejemplo11_objetos/Tank.obj", swapyz=True))
+    objetos.append(OBJ("Juego Tanques/Tank.obj", swapyz=True))
+    objetos.append(OBJ("Juego Tanques/swat_tank.obj", swapyz=True))#tanque de bot
     objetos[0].generate()
+    objetos[1].generate()
 
 def lookat():
     global EYE_X
@@ -153,17 +160,30 @@ def display():
         obj.draw()
         obj.update()
     
-    # Dibujar el tanque
+    # Dibujar el tanque del jugador
     glPushMatrix()
-    # Posicionar el tanque en la posición del jugador
+    # Posicionar el tanque en la posición del jugador (camara del jugador)
     glTranslatef(EYE_X, 0.0, EYE_Z)
-    # Rotar el tanque según la dirección total
+    # Rotar el tanque según la dirección total (Direccion de la camara)
     glRotatef(total_theta, 0.0, 1.0, 0.0)
     # Rotación inicial para orientar el modelo
     glRotatef(-90.0, 1.0, 0.0, 0.0)
-    # Ajustar la escala del modelo (aumentado para hacerlo más visible)
+    # Ajustar la escala del modelo
     glScale(0.6, 0.6, 0.6)
-    objetos[0].render()
+    objetos[0].render() #Render del jugador
+    glPopMatrix()
+
+    # Dibujar el tanque bot
+    glPushMatrix()
+    # Posicionar el tanque bot en su posición
+    glTranslatef(BOT_X, BOT_Y, BOT_Z)
+    # Rotar el tanque bot
+    glRotatef(BOT_ROTATION, 0.0, 1.0, 0.0)
+    # Rotación inicial para orientar el modelo
+    glRotatef(-90.0, 1.0, 0.0, 0.0)
+    # Ajustar la escala del modelo
+    glScale(3.5, 3.5, 3.5)
+    objetos[1].render() #Render del tanque bot
     glPopMatrix()
 
 done = False
