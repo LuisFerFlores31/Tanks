@@ -54,9 +54,6 @@ def shoot_bullet(bullets_list):
 
 
 def Axis():
-    """
-    Dibuja los ejes X (rojo), Y (verde) y Z (azul).
-    """
     glShadeModel(GL_FLAT)
     glLineWidth(3.0)
     
