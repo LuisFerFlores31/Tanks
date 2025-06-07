@@ -14,6 +14,8 @@ sys.path.append('..')
 from Cubo import Cubo
 # Import obj loader
 from objloader import *
+# Import BotTank
+from BotTank import BotTank
 
 screen_width = 1200
 screen_height = 800
@@ -62,6 +64,8 @@ ncubos = 50
 player = Cubo(DimBoard, 1.0, 5.0)
 # Lista para almacenar los objetos 3D
 objetos = []
+# Create bot tank instance
+bot = BotTank(BOT_X, BOT_Z, BOT_ROTATION)
 
 def Axis():
     glShadeModel(GL_FLAT)
@@ -176,9 +180,9 @@ def display():
     # Dibujar el tanque bot
     glPushMatrix()
     # Posicionar el tanque bot en su posición
-    glTranslatef(BOT_X, BOT_Y, BOT_Z)
+    glTranslatef(bot.x, BOT_Y, bot.z)
     # Rotar el tanque bot
-    glRotatef(BOT_ROTATION, 0.0, 1.0, 0.0)
+    glRotatef(bot.rotation, 0.0, 1.0, 0.0)
     # Rotación inicial para orientar el modelo
     glRotatef(-90.0, 1.0, 0.0, 0.0)
     # Ajustar la escala del modelo
@@ -256,6 +260,9 @@ while not done:
         theta = -1
         total_theta -= 1  # Decrement total rotation
         lookat()                     
+    
+    # Update bot tank
+    bot.update((EYE_X, EYE_Z), cubos)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
