@@ -113,7 +113,7 @@ def Init():
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
     glEnable(GL_TEXTURE_2D)
     global suelo_texture
-    suelo_texture = load_texture("../Tanks/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_diff_4k.jpg")
+    suelo_texture = load_texture("Juego Tanques/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_diff_4k.jpg")
     
     
     for i in range(ncubos):
