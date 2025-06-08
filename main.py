@@ -136,12 +136,18 @@ def Init():
     glEnable(GL_LIGHT0)
     glEnable(GL_COLOR_MATERIAL)
     glShadeModel(GL_SMOOTH)
+
+     # Cargar la textura del suelo
+    glEnable(GL_TEXTURE_2D)
+    global suelo_texture
+    suelo_texture = load_texture("Juego Tanques/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_diff_4k.jpg")
     
     # Cargar el modelo del tanque
     objetos.append(OBJ("Juego Tanques/Tank.obj", swapyz=True))
     objetos.append(OBJ("Juego Tanques/swat_tank.obj", swapyz=True))#tanque de bot
     objetos[0].generate()
     objetos[1].generate()
+   
 
 def lookat():
     global EYE_X, EYE_Z, CENTER_X, CENTER_Z, dir, theta
@@ -164,50 +170,68 @@ def display():
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     Axis()
 
-    glColor3f(0.3, 0.3, 0.3)
+    # --- Draw the textured floor ---
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, suelo_texture)
+    glColor3f(1.0, 1.0, 1.0)  # No tint
     glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 0.0)
     glVertex3d(-DimBoard, 0, -DimBoard)
-    glVertex3d(-DimBoard, 0,  DimBoard)
-    glVertex3d( DimBoard, 0,  DimBoard)
-    glVertex3d( DimBoard, 0, -DimBoard)
+    glTexCoord2f(0.0, 10.0)
+    glVertex3d(-DimBoard, 0, DimBoard)
+    glTexCoord2f(10.0, 10.0)
+    glVertex3d(DimBoard, 0, DimBoard)
+    glTexCoord2f(10.0, 0.0)
+    glVertex3d(DimBoard, 0, -DimBoard)
     glEnd()
+    glBindTexture(GL_TEXTURE_2D, 0)
+    glDisable(GL_TEXTURE_2D)
+    # --- End floor ---
 
+    # Draw cubes
     for obj in cubos:
         obj.draw()
         obj.update()
     
-    # Dibujar el tanque del jugador
+    # --- Draw player tank ---
     glPushMatrix()
-    # Posicionar el tanque en la posición del jugador (camara del jugador)
     glTranslatef(EYE_X, 0.0, EYE_Z)
-    # Rotar el tanque según la dirección total (Direccion de la camara)
     glRotatef(total_theta, 0.0, 1.0, 0.0)
-    # Rotación inicial para orientar el modelo
     glRotatef(-90.0, 1.0, 0.0, 0.0)
-    # Ajustar la escala del modelo
     glScale(0.6, 0.6, 0.6)
-    objetos[0].render() #Render del jugador
+    objetos[0].render()
     glPopMatrix()
 
-    # Dibujar el tanque bot
+    # --- Draw bot tank ---
     glPushMatrix()
-    # Posicionar el tanque bot en su posición
     glTranslatef(BOT_X, BOT_Y, BOT_Z)
-    # Rotar el tanque bot
     glRotatef(BOT_ROTATION, 0.0, 1.0, 0.0)
-    # Rotación inicial para orientar el modelo
     glRotatef(-90.0, 1.0, 0.0, 0.0)
-    # Ajustar la escala del modelo
     glScale(3.5, 3.5, 3.5)
-    objetos[1].render() #Render del tanque bot
+    objetos[1].render()
     glPopMatrix()
 
+    # Draw bullets
     for b in bullets:
         b.draw()
 
+def load_texture(path):
+    texture_surface = pygame.image.load(path)
+    texture_data = pygame.image.tostring(texture_surface, "RGB", True)
+    width = texture_surface.get_width()
+    height = texture_surface.get_height()
+
+    texture_id = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texture_id)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+    return texture_id
+
 
 #Bucle principal
-
 Init()
 done = False
 
@@ -295,3 +319,5 @@ while not done:
     pygame.time.wait(10)
 
 pygame.quit()
+
+
