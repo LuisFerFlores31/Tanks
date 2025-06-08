@@ -234,6 +234,13 @@ def display():
     for b in bullets:
         b.draw()
 
+    # Update bot tank
+    bot.update((EYE_X, EYE_Z), cubos, pygame.time.get_ticks())
+    
+    # Draw bot's bullets
+    for bullet in bot.bullets:
+        bullet.draw()
+
 def load_texture(path):
     texture_surface = pygame.image.load(path)
     texture_data = pygame.image.tostring(texture_surface, "RGB", True)
@@ -321,9 +328,6 @@ while not done:
         theta = -1
         total_theta -= 1  # Decrement total rotation
         lookat()                     
-    
-    # Update bot tank
-    bot.update((EYE_X, EYE_Z), cubos)
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
