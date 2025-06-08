@@ -7,7 +7,6 @@ from OpenGL.GLUT import *
 
 import math
 
-
 from Cubo import Cubo
 from objloader import OBJ
 from Bala import Bala, update_and_collide_bullets  # Importamos la clase y la función
@@ -42,26 +41,39 @@ DimBoard = 200
 
 dir = [1.0, 0.0, 0.0]
 theta = 0.0
-total_theta = -90.0  # Track total rotation
+total_theta = -90.0  # Tank total rotation
 col = 0
 
 # Bot tank Variables
-BOT_X = 20
-BOT_Y = 5
-BOT_Z = 20
-BOT_ROTATION = 45.0  # Initial rotation in degrees
+
+BOT_X = DimBoard - 10
+BOT_Y = 5.0
+BOT_Z = DimBoard - 10
+BOT_ROTATION = 120.0  # Facing towards the player (diagonally)
 
 pygame.init()
 
 cubos = []
 ncubos = 50
 
-player = Cubo(DimBoard, 1.0, 5.0)
+# Player tank Variables
+PLAYER_X = -DimBoard + 10
+PLAYER_Y = 5.0
+PLAYER_Z = -DimBoard + 10
+
+EYE_X = PLAYER_X
+EYE_Y = PLAYER_Y + 10.6  # Camera height above player
+EYE_Z = PLAYER_Z
+CENTER_X = EYE_X + 1.0
+CENTER_Y = EYE_Y - 0.6
+CENTER_Z = EYE_Z
+
+player = Cubo(DimBoard, 1.0, PLAYER_Y)
+player.Position = [PLAYER_X, PLAYER_Y, PLAYER_Z]
 
 objetos = []
 
 bullets = []
-
 
 def shoot_bullet(bullets_list):
     spawn_x = EYE_X + dir[0] * 2.0
@@ -193,7 +205,7 @@ def display():
         obj.draw()
         obj.update()
     
-    # --- Draw player tank ---
+    # Draw player tank
     glPushMatrix()
     glTranslatef(EYE_X, 0.0, EYE_Z)
     glRotatef(total_theta, 0.0, 1.0, 0.0)
@@ -202,7 +214,7 @@ def display():
     objetos[0].render()
     glPopMatrix()
 
-    # --- Draw bot tank ---
+    # Draw bot tank
     glPushMatrix()
     glTranslatef(BOT_X, BOT_Y, BOT_Z)
     glRotatef(BOT_ROTATION, 0.0, 1.0, 0.0)
@@ -319,5 +331,4 @@ while not done:
     pygame.time.wait(10)
 
 pygame.quit()
-
 
