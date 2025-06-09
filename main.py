@@ -388,9 +388,9 @@ def display():
     glDisable(GL_TEXTURE_2D)
 
     # Draw cubes
-    #for obj in cubos:
-    #    obj.draw()
-    #    obj.update()
+    for obj in cubos:
+        obj.draw()
+        obj.update()
     
     # Draw player tank if alive
     if PLAYER_ALIVE:
