@@ -412,7 +412,7 @@ def display():
         glColor3f(1.0, 1.0, 1.0)  # Reset color after drawing bullet
 
     # Update bot tank
-    bot.update((EYE_X, EYE_Z), cubos, pygame.time.get_ticks())
+    bot.update((EYE_X, EYE_Z), cubos + walls, pygame.time.get_ticks())
     
     # Draw bot's bullets
     for bullet in bot.bullets:
@@ -471,8 +471,9 @@ while not done:
 
             if not player.Detcol():
                 collision = False
-                for cube in cubos:
-                    if cube.checkPlayerCollision([next_x, EYE_Y, next_z]):
+                # Check collisions with cubes and walls
+                for obj in cubos + walls:
+                    if obj.checkPlayerCollision([next_x, EYE_Y, next_z]):
                         collision = True
                         break
                 if not collision:
@@ -498,8 +499,9 @@ while not done:
 
             if not player.Detcol():
                 collision = False
-                for cube in cubos:
-                    if cube.checkPlayerCollision([next_x, EYE_Y, next_z]):
+                # Check collisions with cubes and walls
+                for obj in cubos + walls:
+                    if obj.checkPlayerCollision([next_x, EYE_Y, next_z]):
                         collision = True
                         break
                 if not collision:
