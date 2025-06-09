@@ -6,6 +6,7 @@ from OpenGL.GLU import *
 from OpenGL.GLUT import *
 
 import math
+import numpy as np
 
 from Cubo import Cubo
 from objloader import OBJ
@@ -41,13 +42,20 @@ Z_MAX=500
 #Dimension del plano
 DimBoard = 200
 
+# Sky sphere parameters
+SKY_RADIUS = DimBoard * 3  # Make sky sphere twice the size of the board
+SKY_SLICES = 32
+SKY_STACKS = 32
+
+# Skybox texture IDs
+skybox_textures = []
+
 dir = [1.0, 0.0, 0.0]
 theta = 0.0
 total_theta = -90.0  # Tank total rotation
 col = 0
 
 # Bot tank Variables
-
 BOT_X = DimBoard - 10
 BOT_Y = 5.0
 BOT_Z = DimBoard - 10
@@ -78,6 +86,114 @@ player.Position = [PLAYER_X, PLAYER_Y, PLAYER_Z]
 objetos = []
 
 bullets = []
+
+def load_skybox_textures():
+    """Load all skybox textures"""
+    global skybox_textures
+    
+    # List of skybox texture files
+    skybox_files = [
+        "Juego Tanques/Skybox/right.png",  # Positive X
+        "Juego Tanques/Skybox/left.png",   # Negative X
+        "Juego Tanques/Skybox/top.png",    # Positive Y
+        "Juego Tanques/Skybox/bottom.png", # Negative Y
+        "Juego Tanques/Skybox/front.png",  # Positive Z
+        "Juego Tanques/Skybox/back.png"    # Negative Z
+    ]
+    
+    # Generate texture IDs
+    skybox_textures = glGenTextures(6)
+    
+    # Load each texture
+    for i, texture_file in enumerate(skybox_files):
+        texture_surface = pygame.image.load(texture_file)
+        texture_data = pygame.image.tostring(texture_surface, "RGB", True)
+        width = texture_surface.get_width()
+        height = texture_surface.get_height()
+        
+        glBindTexture(GL_TEXTURE_2D, skybox_textures[i])
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+        
+        # Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
+
+def draw_skybox():
+    """Draw the skybox using a cube with textures"""
+    glPushMatrix()
+    
+    # Disable lighting for skybox
+    glDisable(GL_LIGHTING)
+    
+    # Enable texturing
+    glEnable(GL_TEXTURE_2D)
+    
+    # Draw each face of the skybox
+    size = SKY_RADIUS
+    
+    # Right face
+    glBindTexture(GL_TEXTURE_2D, skybox_textures[0])
+    glBegin(GL_QUADS)
+    glTexCoord2f(1.0, 0.0); glVertex3f(size, -size, -size)
+    glTexCoord2f(1.0, 1.0); glVertex3f(size, size, -size)
+    glTexCoord2f(0.0, 1.0); glVertex3f(size, size, size)
+    glTexCoord2f(0.0, 0.0); glVertex3f(size, -size, size)
+    glEnd()
+    
+    # Left face
+    glBindTexture(GL_TEXTURE_2D, skybox_textures[1])
+    glBegin(GL_QUADS)
+    glTexCoord2f(1.0, 0.0); glVertex3f(-size, -size, size)
+    glTexCoord2f(1.0, 1.0); glVertex3f(-size, size, size)
+    glTexCoord2f(0.0, 1.0); glVertex3f(-size, size, -size)
+    glTexCoord2f(0.0, 0.0); glVertex3f(-size, -size, -size)
+    glEnd()
+    
+    # Top face
+    glBindTexture(GL_TEXTURE_2D, skybox_textures[2])
+    glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 1.0); glVertex3f(-size, size, -size)
+    glTexCoord2f(0.0, 0.0); glVertex3f(-size, size, size)
+    glTexCoord2f(1.0, 0.0); glVertex3f(size, size, size)
+    glTexCoord2f(1.0, 1.0); glVertex3f(size, size, -size)
+    glEnd()
+    
+    # Bottom face
+    glBindTexture(GL_TEXTURE_2D, skybox_textures[3])
+    glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 1.0); glVertex3f(-size, -size, size)
+    glTexCoord2f(0.0, 0.0); glVertex3f(-size, -size, -size)
+    glTexCoord2f(1.0, 0.0); glVertex3f(size, -size, -size)
+    glTexCoord2f(1.0, 1.0); glVertex3f(size, -size, size)
+    glEnd()
+    
+    # Front face
+    glBindTexture(GL_TEXTURE_2D, skybox_textures[4])
+    glBegin(GL_QUADS)
+    glTexCoord2f(1.0, 0.0); glVertex3f(-size, -size, size)
+    glTexCoord2f(1.0, 1.0); glVertex3f(-size, size, size)
+    glTexCoord2f(0.0, 1.0); glVertex3f(size, size, size)
+    glTexCoord2f(0.0, 0.0); glVertex3f(size, -size, size)
+    glEnd()
+    
+    # Back face
+    glBindTexture(GL_TEXTURE_2D, skybox_textures[5])
+    glBegin(GL_QUADS)
+    glTexCoord2f(0.0, 0.0); glVertex3f(size, -size, -size)
+    glTexCoord2f(0.0, 1.0); glVertex3f(size, size, -size)
+    glTexCoord2f(1.0, 1.0); glVertex3f(-size, size, -size)
+    glTexCoord2f(1.0, 0.0); glVertex3f(-size, -size, -size)
+    glEnd()
+    
+    # Disable texturing
+    glDisable(GL_TEXTURE_2D)
+    
+    # Re-enable lighting
+    glEnable(GL_LIGHTING)
+    
+    glPopMatrix()
 
 def shoot_bullet(bullets_list):
     spawn_x = EYE_X + dir[0] * 2.0
@@ -136,7 +252,8 @@ def Init():
         UP_X, UP_Y, UP_Z
     )
 
-    glClearColor(0, 0, 0, 0)
+    load_skybox_textures()# Load skybox textures
+
     glEnable(GL_DEPTH_TEST)
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL)
 
@@ -192,9 +309,10 @@ def check_tank_collision(bullet_pos, tank_pos, tank_radius):
     return distance < tank_radius
 
 def display():
-    global PLAYER_ALIVE, PLAYER_HEALTH
-    
+    global PLAYER_ALIVE, PLAYER_HEALTH    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    
+    draw_skybox()# Draw skybox first (as background)
     Axis()
 
     # --- Draw the textured floor ---
@@ -243,6 +361,7 @@ def display():
     # Draw bullets
     for b in bullets:
         b.draw()
+        glColor3f(1.0, 1.0, 1.0)  # Reset color after drawing bullet
 
     # Update bot tank
     bot.update((EYE_X, EYE_Z), cubos, pygame.time.get_ticks())
@@ -250,6 +369,7 @@ def display():
     # Draw bot's bullets
     for bullet in bot.bullets:
         bullet.draw()
+        glColor3f(1.0, 1.0, 1.0)  # Reset color after drawing bullet
 
     # Check for tank collisions with bullets
     if PLAYER_ALIVE:
