@@ -65,41 +65,24 @@ class Cubo:
                 self.Position[2] += self.Direction[2]
 
     def drawFaces(self):
+        # Define texture coordinates for a cube
+        tex_coords = [
+            (0, 0), (1, 0), (1, 1), (0, 1)
+        ]
+        # Each face: 4 indices into self.points
+        faces = [
+            [0, 1, 2, 3],  # Bottom
+            [4, 5, 6, 7],  # Top
+            [0, 1, 5, 4],  # Front
+            [1, 2, 6, 5],  # Right
+            [2, 3, 7, 6],  # Back
+            [3, 0, 4, 7],  # Left
+        ]
         glBegin(GL_QUADS)
-        glVertex3fv(self.points[0])
-        glVertex3fv(self.points[1])
-        glVertex3fv(self.points[2])
-        glVertex3fv(self.points[3])
-        glEnd()
-        glBegin(GL_QUADS)
-        glVertex3fv(self.points[4])
-        glVertex3fv(self.points[5])
-        glVertex3fv(self.points[6])
-        glVertex3fv(self.points[7])
-        glEnd()
-        glBegin(GL_QUADS)
-        glVertex3fv(self.points[0])
-        glVertex3fv(self.points[1])
-        glVertex3fv(self.points[5])
-        glVertex3fv(self.points[4])
-        glEnd()
-        glBegin(GL_QUADS)
-        glVertex3fv(self.points[1])
-        glVertex3fv(self.points[2])
-        glVertex3fv(self.points[6])
-        glVertex3fv(self.points[5])
-        glEnd()
-        glBegin(GL_QUADS)
-        glVertex3fv(self.points[2])
-        glVertex3fv(self.points[3])
-        glVertex3fv(self.points[7])
-        glVertex3fv(self.points[6])
-        glEnd()
-        glBegin(GL_QUADS)
-        glVertex3fv(self.points[3])
-        glVertex3fv(self.points[0])
-        glVertex3fv(self.points[4])
-        glVertex3fv(self.points[7])
+        for face in faces:
+            for i, idx in enumerate(face):
+                glTexCoord2f(*tex_coords[i])
+                glVertex3fv(self.points[idx])
         glEnd()
     
     def draw(self):

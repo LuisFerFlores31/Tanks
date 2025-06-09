@@ -256,7 +256,7 @@ def Axis():
 
 
 def Init():
-    global game_map, walls, suelo_texture
+    global game_map, walls, suelo_texture, wall_texture
     pygame.init()
     screen = pygame.display.set_mode(
         (screen_width, screen_height), DOUBLEBUF | OPENGL)
@@ -297,6 +297,8 @@ def Init():
      # Cargar la textura del suelo
     glEnable(GL_TEXTURE_2D)
     suelo_texture = load_texture("Juego Tanques/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_diff_4k.jpg")
+    wall_texture = load_texture("Juego Tanques/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_disp_4k.png")
+
     
     # Initialize map
     game_map = Map(layout, DimBoard, scale=map_scale)
@@ -378,13 +380,17 @@ def display():
     # --- End floor ---
 
     # Draw walls
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, wall_texture)
     for w in walls:
         w.draw()
+    glBindTexture(GL_TEXTURE_2D, 0)
+    glDisable(GL_TEXTURE_2D)
 
     # Draw cubes
-    for obj in cubos:
-        obj.draw()
-        obj.update()
+    #for obj in cubos:
+    #    obj.draw()
+    #    obj.update()
     
     # Draw player tank if alive
     if PLAYER_ALIVE:
