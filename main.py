@@ -221,7 +221,7 @@ def display():
     # Draw bot tank
     glPushMatrix()
     # Posicionar el tanque bot en su posición
-    glTranslatef(bot.x, BOT_Y, bot.z)
+    glTranslatef(bot.x, BOT_Y, bot.z+ 5)
     # Rotar el tanque bot
     glRotatef(bot.rotation, 0.0, 1.0, 0.0)
     # Rotación inicial para orientar el modelo

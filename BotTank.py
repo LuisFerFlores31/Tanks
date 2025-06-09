@@ -1,5 +1,5 @@
 import math
-from Bala import Bala
+from Bala import Bala, update_and_collide_bullets
 
 class BotTank:
     def __init__(self, x, z, rotation):
@@ -10,8 +10,9 @@ class BotTank:
         self.last_shot_time = 0
         self.shot_cooldown = 2000  # 2 seconds between shots
         self.shooting_range = 100
-        self.movement_speed = 1.0
-        self.rotation_speed = 3.0
+        self.movement_speed = 0.7
+        self.rotation_speed = 2.0
+        self.radio = 14  # Same as player's collision radius
 
     def can_shoot_at_player(self, player_position):
         """Check if bot can shoot at player"""
@@ -24,30 +25,41 @@ class BotTank:
             return False
             
         # Calculate angle to player
-        target_angle = math.degrees(math.atan2(dx, dz))
+        target_angle = math.degrees(math.atan2(dx, dz)) + 90  # Add 90 degrees to match model orientation
         angle_diff = abs((target_angle - self.rotation) % 360)
         if angle_diff > 180:
             angle_diff = 360 - angle_diff
             
-        return angle_diff <= 15
+        return angle_diff <= 15  # Allow shooting if within 15 degrees of facing player
 
     def shoot(self, current_time):
         """Shoot a bullet if cooldown has passed"""
         if current_time - self.last_shot_time >= self.shot_cooldown:
-            # Calculate direction vector based on rotation
-            rads = math.radians(self.rotation)
+            # Calculate direction vector based on rotation (adjusted for model orientation)
+            rads = math.radians(self.rotation - 90)  # Subtract 90 degrees to get correct direction
             dir_x = math.sin(rads)
             dir_z = math.cos(rads)
             
             # Create new bullet
             new_bullet = Bala(
-                [self.x, 5.0, self.z],
+                [self.x +5, 5.0, self.z],
                 [dir_x, 0.0, dir_z],
-                speed=8.0,
-                side=2.0
+                speed=7.0,
+                side=2.0 #Tamanio
             )
             self.bullets.append(new_bullet)
             self.last_shot_time = current_time
+
+    def check_collision(self, next_x, next_z, obstacles):
+        """Check if next position would cause collision with obstacles"""
+        for obstacle in obstacles:
+            d_x = next_x - obstacle.Position[0]
+            d_z = next_z - obstacle.Position[2]
+            distance = math.sqrt(d_x * d_x + d_z * d_z)
+            
+            if distance + 2.5 < (self.radio + obstacle.radio):
+                return True
+        return False
 
     def update(self, player_position, obstacles, current_time):
         """Update bot's position and behavior"""
@@ -56,7 +68,7 @@ class BotTank:
         dz = player_position[1] - self.z
         distance = math.sqrt(dx*dx + dz*dz)
         
-        # Calculate target rotation (adjusted for model orientation)
+        # Calculate target rotation
         target_rotation = math.degrees(math.atan2(dx, dz)) + 90  # Add 90 degrees to align with model
         
         # Update rotation
@@ -71,23 +83,24 @@ class BotTank:
         self.rotation = self.rotation % 360
         
         # Move towards player if not too close
-        if distance > 20:  # Minimum distance to maintain
+        if distance > 30:  # Minimum distance to maintain
             # Normalize movement vector
             if distance > 0:
                 dx = dx / distance
                 dz = dz / distance
-                # Apply movement
-                self.x += dx * self.movement_speed
-                self.z += dz * self.movement_speed
+                # Calculate next position
+                next_x = self.x + dx * self.movement_speed
+                next_z = self.z + dz * self.movement_speed
+                
+                # Check for collisions before moving
+                if not self.check_collision(next_x, next_z, obstacles):
+                    self.x = next_x
+                    self.z = next_z
+                self.shoot(current_time)
         
         # Check if can shoot at player
         if self.can_shoot_at_player(player_position):
             self.shoot(current_time)
         
-        # Update bullets
-        for bullet in self.bullets[:]:
-            bullet.update()
-            # Remove bullets that are too far
-            if (abs(bullet.pos[0]) > 200 or 
-                abs(bullet.pos[2]) > 200):
-                self.bullets.remove(bullet) 
+        # Update bullets and handle collisions
+        update_and_collide_bullets(self.bullets, obstacles, 200)  # 200 is the DimBoard value 
