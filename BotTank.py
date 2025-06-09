@@ -25,13 +25,13 @@ class BotTank:
         self.movement_speed = 0.7
         self.rotation_speed = 2.0
         self.radio = 10  # Reduced collision radius
-        self.health = 5  # Bot starts with 3 health points
+        self.health = 5  # Bot starts with 5 health points
         self.alive = True  # Flag to track if bot is alive
         self.current_path = []  # Store the current path
         self.path_update_time = 0
         self.path_update_cooldown = 1000  # Update path more frequently
         self.grid_size = 15  # Adjusted grid size
-        self.min_distance = 30  # Minimum distance to maintain from player
+        self.min_distance = 20  # Minimum distance to maintain from player
 
     def heuristic(self, pos1, pos2):
         """Calculate distance between two points"""
