@@ -62,6 +62,8 @@ ncubos = 50
 PLAYER_X = -DimBoard + 10
 PLAYER_Y = 5.0
 PLAYER_Z = -DimBoard + 10
+PLAYER_HEALTH = 3  # Player starts with 3 health points
+PLAYER_ALIVE = True  # Flag to track if player is alive
 
 EYE_X = PLAYER_X
 EYE_Y = PLAYER_Y + 10.6  # Camera height above player
@@ -182,7 +184,16 @@ def lookat():
     )
 
 
+def check_tank_collision(bullet_pos, tank_pos, tank_radius):
+    """Check if a bullet hits a tank"""
+    dx = bullet_pos[0] - tank_pos[0]
+    dz = bullet_pos[2] - tank_pos[2]
+    distance = math.sqrt(dx*dx + dz*dz)
+    return distance < tank_radius
+
 def display():
+    global PLAYER_ALIVE, PLAYER_HEALTH
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     Axis()
 
@@ -209,26 +220,25 @@ def display():
         obj.draw()
         obj.update()
     
-    # Draw player tank
-    glPushMatrix()
-    glTranslatef(EYE_X, 0.0, EYE_Z)
-    glRotatef(total_theta, 0.0, 1.0, 0.0)
-    glRotatef(-90.0, 1.0, 0.0, 0.0)
-    glScale(0.6, 0.6, 0.6)
-    objetos[0].render()
-    glPopMatrix()
+    # Draw player tank if alive
+    if PLAYER_ALIVE:
+        glPushMatrix()
+        glTranslatef(EYE_X, 0.0, EYE_Z)
+        glRotatef(total_theta, 0.0, 1.0, 0.0)
+        glRotatef(-90.0, 1.0, 0.0, 0.0)
+        glScale(0.6, 0.6, 0.6)
+        objetos[0].render()
+        glPopMatrix()
 
-    # Draw bot tank
-    glPushMatrix()
-    # Posicionar el tanque bot en su posición
-    glTranslatef(bot.x, BOT_Y, bot.z+ 5)
-    # Rotar el tanque bot
-    glRotatef(bot.rotation, 0.0, 1.0, 0.0)
-    # Rotación inicial para orientar el modelo
-    glRotatef(-90.0, 1.0, 0.0, 0.0)
-    glScale(3.5, 3.5, 3.5)
-    objetos[1].render()
-    glPopMatrix()
+    # Draw bot tank if alive
+    if bot.alive:
+        glPushMatrix()
+        glTranslatef(bot.x, BOT_Y, bot.z + 5)
+        glRotatef(bot.rotation, 0.0, 1.0, 0.0)
+        glRotatef(-90.0, 1.0, 0.0, 0.0)
+        glScale(3.5, 3.5, 3.5)
+        objetos[1].render()
+        glPopMatrix()
 
     # Draw bullets
     for b in bullets:
@@ -240,6 +250,23 @@ def display():
     # Draw bot's bullets
     for bullet in bot.bullets:
         bullet.draw()
+
+    # Check for tank collisions with bullets
+    if PLAYER_ALIVE:
+        for bullet in bot.bullets[:]:  # Use slice to create a copy of the list
+            if bullet.alive and check_tank_collision(bullet.pos, [EYE_X, EYE_Y, EYE_Z], 14):
+                bullet.alive = False
+                PLAYER_HEALTH -= 1
+                if PLAYER_HEALTH <= 0:
+                    PLAYER_ALIVE = False
+                    print("Game Over - You Lost!")
+
+    if bot.alive:
+        for bullet in bullets[:]:  # Use slice to create a copy of the list
+            if bullet.alive and check_tank_collision(bullet.pos, [bot.x, BOT_Y, bot.z], 14):
+                bullet.alive = False
+                if bot.take_damage():
+                    print("You Win!")
 
 def load_texture(path):
     texture_surface = pygame.image.load(path)
@@ -264,79 +291,78 @@ done = False
 while not done:
     keys = pygame.key.get_pressed()
 
-   
-    if keys[pygame.K_UP]:
-        next_x = EYE_X + dir[0]
-        next_z = EYE_Z + dir[2]
+    if PLAYER_ALIVE:  # Only allow player movement if alive
+        if keys[pygame.K_UP]:
+            next_x = EYE_X + dir[0]
+            next_z = EYE_Z + dir[2]
 
-        player.Position[0] = EYE_X
-        player.Position[2] = EYE_Z
-        player.Direction[0] = dir[0]
-        player.Direction[2] = dir[2]
+            player.Position[0] = EYE_X
+            player.Position[2] = EYE_Z
+            player.Direction[0] = dir[0]
+            player.Direction[2] = dir[2]
 
-        if not player.Detcol():
-            collision = False
-            for cube in cubos:
-                if cube.checkPlayerCollision([next_x, EYE_Y, next_z]):
-                    collision = True
-                    break
-            if not collision:
-                EYE_X = next_x
-                EYE_Z = next_z
-                CENTER_X = EYE_X + dir[0]
-                CENTER_Z = EYE_Z + dir[2]
-                glLoadIdentity()
-                gluLookAt(
-                    EYE_X, EYE_Y, EYE_Z,
-                    CENTER_X, CENTER_Y, CENTER_Z,
-                    UP_X, UP_Y, UP_Z
-                )
+            if not player.Detcol():
+                collision = False
+                for cube in cubos:
+                    if cube.checkPlayerCollision([next_x, EYE_Y, next_z]):
+                        collision = True
+                        break
+                if not collision:
+                    EYE_X = next_x
+                    EYE_Z = next_z
+                    CENTER_X = EYE_X + dir[0]
+                    CENTER_Z = EYE_Z + dir[2]
+                    glLoadIdentity()
+                    gluLookAt(
+                        EYE_X, EYE_Y, EYE_Z,
+                        CENTER_X, CENTER_Y, CENTER_Z,
+                        UP_X, UP_Y, UP_Z
+                    )
 
-    if keys[pygame.K_DOWN]:
-        next_x = EYE_X - dir[0]
-        next_z = EYE_Z - dir[2]
+        if keys[pygame.K_DOWN]:
+            next_x = EYE_X - dir[0]
+            next_z = EYE_Z - dir[2]
 
-        player.Position[0] = EYE_X
-        player.Position[2] = EYE_Z
-        player.Direction[0] = dir[0]
-        player.Direction[2] = dir[2]
+            player.Position[0] = EYE_X
+            player.Position[2] = EYE_Z
+            player.Direction[0] = dir[0]
+            player.Direction[2] = dir[2]
 
-        if not player.Detcol():
-            collision = False
-            for cube in cubos:
-                if cube.checkPlayerCollision([next_x, EYE_Y, next_z]):
-                    collision = True
-                    break
-            if not collision:
-                EYE_X = next_x
-                EYE_Z = next_z
-                CENTER_X = EYE_X + dir[0]
-                CENTER_Z = EYE_Z + dir[2]
-                glLoadIdentity()
-                gluLookAt(
-                    EYE_X, EYE_Y, EYE_Z,
-                    CENTER_X, CENTER_Y, CENTER_Z,
-                    UP_X, UP_Y, UP_Z
-                )
+            if not player.Detcol():
+                collision = False
+                for cube in cubos:
+                    if cube.checkPlayerCollision([next_x, EYE_Y, next_z]):
+                        collision = True
+                        break
+                if not collision:
+                    EYE_X = next_x
+                    EYE_Z = next_z
+                    CENTER_X = EYE_X + dir[0]
+                    CENTER_Z = EYE_Z + dir[2]
+                    glLoadIdentity()
+                    gluLookAt(
+                        EYE_X, EYE_Y, EYE_Z,
+                        CENTER_X, CENTER_Y, CENTER_Z,
+                        UP_X, UP_Y, UP_Z
+                    )
 
-    if keys[pygame.K_LEFT]:
-        theta =  1
-        total_theta += 1
-        lookat()
+        if keys[pygame.K_LEFT]:
+            theta = 1
+            total_theta += 1
+            lookat()
 
-    if keys[pygame.K_RIGHT]:
-        theta = -1
-        total_theta -= 1  # Decrement total rotation
-        lookat()                     
+        if keys[pygame.K_RIGHT]:
+            theta = -1
+            total_theta -= 1
+            lookat()
     
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             done = True
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and PLAYER_ALIVE:  # Only allow shooting if alive
                 shoot_bullet(bullets)
-
 
     update_and_collide_bullets(bullets, cubos, DimBoard)
 

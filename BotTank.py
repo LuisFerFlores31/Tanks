@@ -13,9 +13,23 @@ class BotTank:
         self.movement_speed = 0.7
         self.rotation_speed = 2.0
         self.radio = 14  # Same as player's collision radius
+        self.health = 3  # Bot starts with 3 health points
+        self.alive = True  # Flag to track if bot is alive
+
+    def take_damage(self):
+        """Handle damage taken by the bot"""
+        if self.alive:
+            self.health -= 1
+            if self.health <= 0:
+                self.alive = False
+                return True  # Return True if bot is destroyed
+        return False
 
     def can_shoot_at_player(self, player_position):
         """Check if bot can shoot at player"""
+        if not self.alive:
+            return False
+            
         # Calculate distance to player
         dx = player_position[0] - self.x
         dz = player_position[1] - self.z
@@ -34,6 +48,9 @@ class BotTank:
 
     def shoot(self, current_time):
         """Shoot a bullet if cooldown has passed"""
+        if not self.alive:
+            return
+            
         if current_time - self.last_shot_time >= self.shot_cooldown:
             # Calculate direction vector based on rotation (adjusted for model orientation)
             rads = math.radians(self.rotation - 90)  # Subtract 90 degrees to get correct direction
@@ -42,16 +59,19 @@ class BotTank:
             
             # Create new bullet
             new_bullet = Bala(
-                [self.x +5, 5.0, self.z],
+                [self.x + 5, 5.0, self.z],
                 [dir_x, 0.0, dir_z],
                 speed=7.0,
-                side=2.0 #Tamanio
+                side=2.0  # Tamanio
             )
             self.bullets.append(new_bullet)
             self.last_shot_time = current_time
 
     def check_collision(self, next_x, next_z, obstacles):
         """Check if next position would cause collision with obstacles"""
+        if not self.alive:
+            return True
+            
         for obstacle in obstacles:
             d_x = next_x - obstacle.Position[0]
             d_z = next_z - obstacle.Position[2]
@@ -63,6 +83,9 @@ class BotTank:
 
     def update(self, player_position, obstacles, current_time):
         """Update bot's position and behavior"""
+        if not self.alive:
+            return
+            
         # Calculate direction to player
         dx = player_position[0] - self.x
         dz = player_position[1] - self.z
@@ -96,7 +119,7 @@ class BotTank:
                 if not self.check_collision(next_x, next_z, obstacles):
                     self.x = next_x
                     self.z = next_z
-                self.shoot(current_time)
+                    self.shoot(current_time)
         
         # Check if can shoot at player
         if self.can_shoot_at_player(player_position):
