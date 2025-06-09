@@ -136,6 +136,6 @@ class Cubo:
         d_z = player_pos[2] - self.Position[2]
         distance = math.sqrt(d_x * d_x + d_z * d_z)
         
-        if distance + 2.5 < (self.radio + 14):  #El radio del jugador es 2 por ahora
+        if distance + 2.5 < (self.radio + 8):  #El radio del jugador es 2 por ahora
             return True
         return False

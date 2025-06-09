@@ -517,13 +517,13 @@ while not done:
                     )
 
         if keys[pygame.K_LEFT]:
-            theta = 1
-            total_theta += 1
+            theta = 3
+            total_theta += 3
             lookat()
 
         if keys[pygame.K_RIGHT]:
-            theta = -1
-            total_theta -= 1
+            theta = -3
+            total_theta -= 3
             lookat()
     
     for event in pygame.event.get():
