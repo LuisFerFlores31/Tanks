@@ -14,6 +14,7 @@ from Bala import Bala, update_and_collide_bullets  # Importamos la clase y la fu
 
 # Import BotTank
 from BotTank import BotTank
+from map import Map
 
 screen_width = 1200
 screen_height = 800
@@ -56,9 +57,9 @@ total_theta = -90.0  # Tank total rotation
 col = 0
 
 # Bot tank Variables
-BOT_X = DimBoard - 10
+BOT_X = 100.0  # Spawn in the far-right area
 BOT_Y = 5.0
-BOT_Z = DimBoard - 10
+BOT_Z = 100.0
 BOT_ROTATION = 120.0  # Facing towards the player (diagonally)
 
 pygame.init()
@@ -67,9 +68,9 @@ cubos = []
 ncubos = 50
 
 # Player tank Variables
-PLAYER_X = -DimBoard + 10
+PLAYER_X = -100.0  # Spawn in the far-left area
 PLAYER_Y = 5.0
-PLAYER_Z = -DimBoard + 10
+PLAYER_Z = -100.0
 PLAYER_HEALTH = 3  # Player starts with 3 health points
 PLAYER_ALIVE = True  # Flag to track if player is alive
 
@@ -84,8 +85,31 @@ player = Cubo(DimBoard, 1.0, PLAYER_Y)
 player.Position = [PLAYER_X, PLAYER_Y, PLAYER_Z]
 
 objetos = []
-
 bullets = []
+game_map = None
+walls = []
+
+# Map parameters
+map_scale = 25.0
+border_scale = map_scale
+safe_radius = 25.0
+
+layout = [
+    [1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,0,1,0,1,0,1,0,1],
+    [1,0,1,0,0,0,1,0,0,0,1],
+    [1,0,1,1,1,0,1,1,1,0,1],
+    [1,0,0,0,1,0,0,0,1,0,1],
+    [1,1,1,0,1,1,1,0,1,0,1],
+    [1,0,0,0,0,0,1,0,0,0,1],
+    [1,0,1,1,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1],
+    [1,1,1,1,1,1,1,1,1,1,1],
+]
+
+# Create bot tank instance
+bot = BotTank(BOT_X, BOT_Z, BOT_ROTATION)
 
 def load_skybox_textures():
     """Load all skybox textures"""
@@ -207,9 +231,6 @@ def shoot_bullet(bullets_list):
     bullets_list.append(new_bullet)
 
 
-# Create bot tank instance
-bot = BotTank(BOT_X, BOT_Z, BOT_ROTATION)
-
 def Axis():
     glShadeModel(GL_FLAT)
     glLineWidth(3.0)
@@ -235,6 +256,7 @@ def Axis():
 
 
 def Init():
+    global game_map, walls, suelo_texture
     pygame.init()
     screen = pygame.display.set_mode(
         (screen_width, screen_height), DOUBLEBUF | OPENGL)
@@ -274,8 +296,30 @@ def Init():
 
      # Cargar la textura del suelo
     glEnable(GL_TEXTURE_2D)
-    global suelo_texture
     suelo_texture = load_texture("Juego Tanques/patterned_concrete_wall_4k.blend/textures/patterned_concrete_wall_diff_4k.jpg")
+    
+    # Initialize map
+    game_map = Map(layout, DimBoard, scale=map_scale)
+    walls = [
+        w for w in game_map.walls
+        if math.hypot(w.Position[0] - PLAYER_X,
+                      w.Position[2] - PLAYER_Z) >= safe_radius
+    ]
+    
+    # Add border walls
+    step = int(border_scale * 2)
+    for x in range(-DimBoard, DimBoard+1, step):
+        for z in (-DimBoard, DimBoard):
+            b = Cubo(DimBoard, 0.0, border_scale)
+            b.Position = [x, border_scale, z]
+            b.Cubos = []
+            walls.append(b)
+    for z in range(-DimBoard, DimBoard+1, step):
+        for x in (-DimBoard, DimBoard):
+            b = Cubo(DimBoard, 0.0, border_scale)
+            b.Position = [x, border_scale, z]
+            b.Cubos = []
+            walls.append(b)
     
     # Cargar el modelo del tanque
     objetos.append(OBJ("Juego Tanques/Tank.obj", swapyz=True))
@@ -332,6 +376,10 @@ def display():
     glBindTexture(GL_TEXTURE_2D, 0)
     glDisable(GL_TEXTURE_2D)
     # --- End floor ---
+
+    # Draw walls
+    for w in walls:
+        w.draw()
 
     # Draw cubes
     for obj in cubos:
